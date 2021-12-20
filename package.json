@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:xtools.helloWorld"
+        "onCommand:xtools.log"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "xtools.helloWorld",
-				"title": "Hello World"
+				"command": "xtools.log",
+				"title": "XTools: Print current content"
 			}
 		]
 	},

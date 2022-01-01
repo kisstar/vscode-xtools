@@ -6,6 +6,8 @@ import * as vscode from 'vscode';
 
 const { showInformationMessage, showErrorMessage } = vscode.window;
 
-export const messageInfo = (message: string) => showInformationMessage(message);
+export const messageInfo = (message: string, ...items: string[]) =>
+  showInformationMessage(message, ...items);
 
-export const messageError = (message: string) => showErrorMessage(message);
+export const messageError = (message: string, ...items: string[]) =>
+  showErrorMessage(message, ...items);

@@ -1,34 +1,12 @@
 import * as vscode from 'vscode';
-import { messageError } from '../lib/utils';
+import { LOG_REGEX, messageError, messageInfo } from '../lib/utils';
 
 /**
- * Replace selection
- * @param {string} content New content
+ * Insert print statement
  * @returns {void}
  */
-const insertText = (content: string) => {
-  const { window, Range } = vscode;
-  const { activeTextEditor } = window;
-
-  if (!activeTextEditor) {
-    messageError("Can't insert log because no document is open");
-    return;
-  }
-
-  const { selection } = activeTextEditor;
-  const range = new Range(selection.start, selection.end);
-
-  activeTextEditor.edit((editBuilder) => {
-    editBuilder.replace(range, content);
-  });
-};
-
-/**
- * Print selection
- * @returns {void}
- */
-export const log = () => {
-  const { window, commands } = vscode;
+export const addLog = () => {
+  const { window, commands, Range } = vscode;
   const { activeTextEditor } = window;
   const { executeCommand } = commands;
 
@@ -46,7 +24,53 @@ export const log = () => {
 
   executeCommand('editor.action.insertLineAfter').then(() => {
     const content = `console.log('${text}: ', ${text});`;
+    const range = new Range(selection.start, selection.end);
 
-    insertText(content);
+    activeTextEditor.edit((editBuilder) => {
+      editBuilder.replace(range, content);
+    });
+  });
+};
+
+/**
+ * Remove print statement
+ * @returns {void}
+ */
+export const removeLog = () => {
+  const { window, workspace, WorkspaceEdit } = vscode;
+  const { activeTextEditor } = window;
+
+  if (!activeTextEditor) {
+    messageError("Can't remove log because no document is open");
+    return;
+  }
+
+  const { document } = activeTextEditor;
+  const { lineCount } = document;
+  const workspaceEdit = new WorkspaceEdit();
+  let logCount = 0;
+
+  for (let row = 0; row < lineCount; row++) {
+    const line = document.lineAt(row);
+    const { text } = line;
+
+    LOG_REGEX.lastIndex = 0;
+
+    if (!LOG_REGEX.test(text)) {
+      continue;
+    }
+
+    workspaceEdit.delete(document.uri, line.range);
+    logCount++;
+  }
+
+  if (!logCount) {
+    return;
+  }
+
+  workspace.applyEdit(workspaceEdit).then(() => {
+    messageInfo(
+      `${logCount} print statement${logCount > 1 ? 's' : ''} removed`
+    );
   });
 };

@@ -11,6 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:xtools.log",
+    "onCommand:xtools.convert_log",
     "onCommand:xtools.remove_log"
   ],
   "main": "./dist/extension.js",
@@ -19,6 +20,10 @@
       {
         "command": "xtools.log",
         "title": "XTools: Print current content"
+      },
+      {
+        "command": "xtools.convert_log",
+        "title": "XTools: Convert to print statement"
       },
       {
         "command": "xtools.remove_log",

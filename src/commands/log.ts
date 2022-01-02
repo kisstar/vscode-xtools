@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import { LOG_REGEX, messageError, messageInfo } from '../lib/utils';
+import {
+  LOG_PRE_REGEX,
+  LOG_REGEX,
+  messageError,
+  messageInfo
+} from '../lib/utils';
 
 /**
  * Insert print statement
@@ -30,6 +35,48 @@ export const addLog = () => {
       editBuilder.replace(range, content);
     });
   });
+};
+
+/**
+ * Convert content to print statement
+ * @returns {void}
+ */
+export const convertLog = () => {
+  const { window, commands } = vscode;
+  const { activeTextEditor } = window;
+  const { executeCommand } = commands;
+
+  if (!activeTextEditor) {
+    messageError("Can't convert content because no document is open");
+    return;
+  }
+
+  const { document, selection } = activeTextEditor;
+  const { getWordRangeAtPosition } = document;
+  const position = getWordRangeAtPosition(selection.anchor, LOG_PRE_REGEX);
+
+  if (!position) {
+    messageError("Can't convert because there is no matching content");
+    return;
+  }
+
+  const content = document.getText(position);
+  const matchResult = content.match(LOG_PRE_REGEX);
+  const logContent = matchResult![1];
+
+  activeTextEditor
+    .edit((editBuilder) => {
+      editBuilder.replace(
+        position,
+        `console.log('${logContent}: '${logContent})`
+      );
+    })
+    .then(() => {
+      // Move cursor position
+      executeCommand('cursorMove', {
+        to: 'wrappedLineEnd'
+      });
+    });
 };
 
 /**
